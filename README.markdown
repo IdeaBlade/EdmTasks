@@ -48,7 +48,7 @@ do this at the bottom of the file, right before the closing `</project>`.  You c
 copy and paste the code below, then update the path to EdmTasks.dll to match your system.
 
 	  <!-- Define the task and the DLL where it is found.  -->
-	  <!-- EdmTasks.dll, ConceptualEdmGen.dll, and EntityFramework.dll should be in the same directory. -->
+	  <!-- EdmTasks.dll and EntityFramework.dll should be in the same directory. -->
 	  <UsingTask TaskName="EdmTasks.ViewRefreshTask" AssemblyFile="..\..\Tools\EdmTasks\EdmTasks.dll" />
 
 	  <!-- Run BeforeBuild only if the Compile list (*.cs) is newer than the TargetPath (dll) -->
