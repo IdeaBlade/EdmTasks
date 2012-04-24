@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- 
+  	most of the csproj file is above here.  Put the following in place of the "BeforeBuild" target in the .csproj file 
+  -->
+
+  <!-- Define the task and the DLL where it is found.  -->
+  <!-- EdmTasks.dll, ConceptualEdmGen.dll, and EntityFramework.dll should be in the same directory. -->
+  <UsingTask TaskName="EdmTasks.ViewRefreshTask" AssemblyFile="..\..\Tools\EdmTasks\EdmTasks.dll" />
+
+  <!-- Run BeforeBuild only if the Compile list (*.cs) is newer than the TargetPath (dll) -->
+  <Target Name="BeforeBuild" Inputs="@(Compile)" Outputs="$(TargetPath)">
+
+    <!-- CoreBuild the project first so we have the model DLL. -->
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="CoreBuild" />
+
+    <!-- Find the DbContext in the TargetPath assembly, use it to generate the views. -->
+    <ViewRefreshTask Assembly="$(TargetPath)" DbContext="JonasNETDbContext" Lang="cs" />
+
+  </Target>
+</Project>
