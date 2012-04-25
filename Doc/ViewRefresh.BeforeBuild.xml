@@ -5,7 +5,7 @@
   -->
 
   <!-- Define the task and the DLL where it is found.  -->
-  <!-- EdmTasks.dll, ConceptualEdmGen.dll, and EntityFramework.dll should be in the same directory. -->
+  <!-- EdmTasks.dll and EntityFramework.dll should be in the same directory. -->
   <UsingTask TaskName="EdmTasks.ViewRefreshTask" AssemblyFile="..\..\Tools\EdmTasks\EdmTasks.dll" />
 
   <!-- Run BeforeBuild only if the Compile list (*.cs) is newer than the TargetPath (dll) -->
@@ -15,7 +15,7 @@
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="CoreBuild" />
 
     <!-- Find the DbContext in the TargetPath assembly, use it to generate the views. -->
-    <ViewRefreshTask Assembly="$(TargetPath)" DbContext="JonasNETDbContext" Lang="cs" />
+    <ViewRefreshTask Assembly="$(TargetPath)" Lang="cs" />
 
   </Target>
 </Project>

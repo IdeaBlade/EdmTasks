@@ -4,21 +4,17 @@
   	most of the csproj file is above here.  Put the following in place of the "AfterBuild" target in the .csproj file 
   -->
 
-  <UsingTask TaskName="EdmTasks.EdmxWriteTask" AssemblyFile="C:\apps\whisper\development\Tools\EdmTasks\EdmTasks.dll" />
-  <UsingTask TaskName="EdmTasks.ViewGenTask" AssemblyFile="C:\apps\whisper\development\Tools\EdmTasks\EdmTasks.dll" />
+  <UsingTask TaskName="EdmTasks.EdmxWriteTask" AssemblyFile="..\..\Tools\EdmTasks\EdmTasks.dll" />
+  <UsingTask TaskName="EdmTasks.ViewGenTask" AssemblyFile="..\..\Tools\EdmTasks\EdmTasks.dll" />
 
-  <Target Name="AfterBuild" DependsOnTargets="DevForceEntityModelMetadataDeploy" Condition="'$(MetadataChanged)' == 'true'">
+  <!-- Run after every build -->
+  <Target Name="AfterBuild">
 
-    <EdmxWriteTask Assembly="$(TargetPath)" DbContext="JonasNETDbContext" EdmxFile="JonasNETDbContext.edmx" />
+    <!-- Write an EDMX file from the DbContext -->
+    <EdmxWriteTask Assembly="$(TargetPath)" EdmxFile="MyDbContext.edmx" />
 
-    <ViewGenTask EdmxFile="JonasNETDbContext.edmx" Lang="cs" />
-
-    <!-- Rebuild the project now so the user won't have to.  -->
-    <MSBuild 
-      Projects="$(MSBuildProjectFullPath)"
-      Targets="CoreBuild"
-      Properties="SkipDevForce=true;Rebuild=true" >
-    </MSBuild>
+    <!-- Build the pre-generated views file from the EDMX -->
+    <ViewGenTask EdmxFile="MyDbContext.edmx" Lang="cs" />
 
   </Target>
 </Project>
