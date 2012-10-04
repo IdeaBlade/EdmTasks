@@ -106,30 +106,35 @@ namespace EdmTasks
     {
         private static Version v1 = EntityFrameworkVersions.Version1;
         private static Version v2 = EntityFrameworkVersions.Version2;
+        private static Version v3 = EntityFrameworkVersions.Version3;
 
         private Dictionary<Version, XNamespace> _versionToCSDLNamespace = new Dictionary<Version, XNamespace>() 
         { 
         { v1, XNamespace.Get("http://schemas.microsoft.com/ado/2006/04/edm") }, 
-        { v2, XNamespace.Get("http://schemas.microsoft.com/ado/2008/09/edm") } 
+        { v2, XNamespace.Get("http://schemas.microsoft.com/ado/2008/09/edm") },
+        { v3, XNamespace.Get("http://schemas.microsoft.com/ado/2009/11/edm") } 
         };
 
         private Dictionary<Version, XNamespace> _versionToSSDLNamespace = new Dictionary<Version, XNamespace>() 
         { 
         { v1, XNamespace.Get("http://schemas.microsoft.com/ado/2006/04/edm/ssdl") }, 
-        { v2, XNamespace.Get("http://schemas.microsoft.com/ado/2009/02/edm/ssdl") } 
+        { v2, XNamespace.Get("http://schemas.microsoft.com/ado/2009/02/edm/ssdl") },
+        { v3, XNamespace.Get("http://schemas.microsoft.com/ado/2009/11/edm/ssdl") } 
         };
 
         private Dictionary<Version, XNamespace> _versionToMSLNamespace = new Dictionary<Version, XNamespace>() 
         { 
         { v1, XNamespace.Get("urn:schemas-microsoft-com:windows:storage:mapping:CS") }, 
-        { v2, XNamespace.Get("http://schemas.microsoft.com/ado/2008/09/mapping/cs") } 
+        { v2, XNamespace.Get("http://schemas.microsoft.com/ado/2008/09/mapping/cs") },
+        { v3, XNamespace.Get("http://schemas.microsoft.com/ado/2009/11/mapping/cs") } 
         };
 
 
         private Dictionary<Version, XNamespace> _versionToEDMXNamespace = new Dictionary<Version, XNamespace>() 
         { 
         { v1, XNamespace.Get("http://schemas.microsoft.com/ado/2007/06/edmx") }, 
-        { v2, XNamespace.Get("http://schemas.microsoft.com/ado/2008/10/edmx") } 
+        { v2, XNamespace.Get("http://schemas.microsoft.com/ado/2008/10/edmx") } ,
+        { v3, XNamespace.Get("http://schemas.microsoft.com/ado/2009/11/edmx") } 
         };
 
         private Dictionary<XNamespace, Version> _namespaceToVersion = new Dictionary<XNamespace, Version>();
@@ -181,6 +186,8 @@ namespace EdmTasks
         {
             XNamespace n;
             _versionToMSLNamespace.TryGetValue(v, out n);
+            if (n == null)
+                throw new NotImplementedException("Unknown msl namespace: " + v.ToString());
             return n;
         }
 
@@ -188,6 +195,8 @@ namespace EdmTasks
         {
             XNamespace n;
             _versionToCSDLNamespace.TryGetValue(v, out n);
+            if (n == null)
+                throw new NotImplementedException("Unknown csdl namespace: " + v.ToString());
             return n;
         }
 
@@ -195,6 +204,8 @@ namespace EdmTasks
         {
             XNamespace n;
             _versionToSSDLNamespace.TryGetValue(v, out n);
+            if (n == null)
+                throw new NotImplementedException("Unknown ssdl namespace: " + v.ToString());
             return n;
         }
 
@@ -202,6 +213,8 @@ namespace EdmTasks
         {
             XNamespace n;
             _versionToEDMXNamespace.TryGetValue(v, out n);
+            if (n == null)
+                throw new NotImplementedException("Unknown edmx namespace: " + v.ToString());
             return n;
         }
 
@@ -209,6 +222,8 @@ namespace EdmTasks
         {
             Version v;
             _namespaceToVersion.TryGetValue(n, out v);
+            if (v == null)
+                throw new NotImplementedException("Unknown namespace: " + n.NamespaceName);
             return v;
         }
     }
