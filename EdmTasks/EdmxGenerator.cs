@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Build.Utilities;
+using System;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.IO;
@@ -6,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
-using Microsoft.Build.Utilities;
 
 namespace EdmTasks
 {
@@ -55,7 +55,7 @@ namespace EdmTasks
             }
             catch (Exception ex)
             {
-                Log.LogError("Unable to write EDMX file {0}: {1}", filepath, ex.Message);
+                Log.LogError("Unable to write EDMX file {0}: {1}", filepath, ex.ToString());
                 return false;
             }
         }
@@ -68,7 +68,7 @@ namespace EdmTasks
         {
             try
             {
-                Log.LogMessage("Writing Edmx to string");
+                Log.LogMessage("Writing Edmx to string for context {0} at {1}.", dbContext.GetType().AssemblyQualifiedName, dbContext.GetType().Assembly.Location);
                 var sb = new StringBuilder(512 * 1024);
                 var sw = new StringWriter(sb);
                 var xmlStringer = new XmlTextWriter(sw);
@@ -94,11 +94,11 @@ namespace EdmTasks
         /// <param name="assemblyName">Assembly search for DbContext(s)</param>
         /// <param name="suffix">Suffix that should match the class name, e.g. "DbContext".  Ignored if null or empty.</param>
         /// <returns>the DbContext, or null if none was found in the assembly.</returns>
-        public DbContext GetDbContext(string assemblyName, string suffix)
+        public DbContext GetDbContext(string assemblyName, string suffix, string connectionString = null)
         {
             var assembly = GetAssembly(assemblyName);
             if (assembly == null) return null;
-            Log.LogMessage("Resolved Assembly={0}", assembly.GetName());
+            Log.LogMessage("Resolved Assembly={0}, {1}", assembly.GetName(), assembly.Location);
 
             var dbcTypes = assembly.GetTypes().Where(t => typeof(DbContext).IsAssignableFrom(t));
             if (!string.IsNullOrEmpty(suffix))
@@ -108,7 +108,7 @@ namespace EdmTasks
             DbContext dbContext = null;
             foreach (var dbcType in dbcTypes)
             {
-                dbContext = Activate(dbcType);
+                dbContext = Activate(dbcType, connectionString);
                 if (dbContext != null) break;
             }
             if (dbContext == null)
@@ -120,17 +120,28 @@ namespace EdmTasks
         /// Create an instance of the given DbContext subclass.
         /// </summary>
         /// <returns>The DbContext instance, or null if there was an error.</returns>
-        private DbContext Activate(Type dbcType)
+        private DbContext Activate(Type dbcType, string connectionString = null)
         {
             try
             {
-                var dbContext = (DbContext)Activator.CreateInstance(dbcType);
+                // set EF initializer to null!
+                MethodInfo setInitializerMethod = typeof(System.Data.Entity.Database).GetMethod("SetInitializer", System.Reflection.BindingFlags.Static | BindingFlags.Public);
+                Type[] genericArguments = new Type[] { dbcType };
+                MethodInfo setInitializerGenericMethod = setInitializerMethod.MakeGenericMethod(genericArguments);
+                setInitializerGenericMethod.Invoke(null, new object[] { null });
+
+                DbContext dbContext;
+                if (connectionString != null)
+                    dbContext = (DbContext)Activator.CreateInstance(dbcType, connectionString);
+                else
+                    dbContext = (DbContext)Activator.CreateInstance(dbcType);
+
                 Log.LogMessage("DbContext type={0}", dbcType.FullName);
                 return dbContext;
             }
             catch (Exception ex)
             {
-                Log.LogError("Unable to create instance of type {0}: {1}", dbcType.FullName, ex.Message);
+                Log.LogError("Unable to create instance of type {0}: {1}", dbcType.FullName, ex.ToString());
                 return null;
             }
         }

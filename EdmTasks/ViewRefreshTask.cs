@@ -27,6 +27,13 @@ namespace EdmTasks
         /// </summary>
         public string Lang { get; set; }
 
+        public string Inputs { get; set; }
+
+        /// <summary>
+        /// Optional.  If supplied, passes the connection string to the context.
+        /// </summary>
+        public string ConnectionString { get; set; }
+
         /// <summary>
         /// Create a pre-generated views file from the DbContext class in the assembly.
         /// Name of views file is the name of the DbContext with ".Views" added to the name.
@@ -39,8 +46,7 @@ namespace EdmTasks
             var startTime = DateTime.Now;
             string suffix = string.IsNullOrEmpty(DbContext) ? "DbContext" : DbContext;
             var lang = string.IsNullOrEmpty(Lang) ? "cs" : Lang;
-            Log.LogMessage("ViewRefreshTask: Assembly={0}, DbContext={1}, Lang={2}", Assembly.ItemSpec, suffix, lang);
-
+            Log.LogMessage("ViewRefreshTask: Assembly={0}, DbContext={1}, Lang={2}, ConnectionString={3}", Assembly.ItemSpec, suffix, lang, ConnectionString);
             LanguageOption langOpt;
             if (!ViewGenerator.ParseLanguageOption(lang, out langOpt))
             {
@@ -50,7 +56,7 @@ namespace EdmTasks
 
             // Generate the EDMX as a string
             var eg = new EdmxGenerator(Log);
-            DbContext dbContext = eg.GetDbContext(Assembly.ItemSpec, suffix);
+            DbContext dbContext = eg.GetDbContext(Assembly.ItemSpec, suffix, this.ConnectionString);
             if (dbContext == null) return false;
 
             var edmx = eg.WriteEdmxString(dbContext);
@@ -67,7 +73,8 @@ namespace EdmTasks
             bool result;
             if (newHash.Equals(oldHash))
             {
-                Log.LogMessage("Views are already current.");
+                Log.LogMessage("Views are already current.  Touching file.");
+                System.IO.File.SetLastWriteTimeUtc(viewsFileName, DateTime.UtcNow);
                 result = true;
             }
             else
