@@ -81,7 +81,7 @@ Performance
 ViewRefreshTask was tested primarily on a 200-entity model.  The timings were roughly as follows:
 - No change in domain model: 0 seconds (the BeforeBuild target parameters ensure that the task does not run in this situation)
 - Change in the domain model that does not affect the views: 5 seconds (the EDMX has not changed, so Views file is not regenerated)
-- Change in the domain model that does affect the views: 60 seconds (a new Vies file is regenerated)
+- Change in the domain model that does affect the views: 60 seconds (a new Views file is regenerated)
 
 Caveats
 -------
@@ -96,6 +96,8 @@ next time the task runs.
 
 Tested Versions
 ------------------
-EdmTasks was tested with Visual Studio 2010, using Entity Framework 4.1, 4.2, and 4.3.1.  
+The **master** branch was tested with Visual Studio 2012, with .NET 4.5 and Entity Framework 5.
+
+The **EF4** branch was tested with Visual Studio 2010, using Entity Framework 4.1, 4.2, and 4.3.1.  
 It may work on other versions as well.
 
